@@ -16,13 +16,13 @@ void setup() {
 void loop() {
   static unsigned long ms = millis();
   
-  if (millis() - ms >= 1000 / 15) {
+  if (millis() - ms >= 1000 / 60) { // "fps"
     ms = millis();
 
     // DRAW, MOVE BALLS, COLLISION CHECKS
-
+    Ball *ball;
     for (int i = 0; i < 4; i++) {
-      Ball *ball = ball_list[i];
+      ball = ball_list[i];
       while ( ball != NULL ){
         Ball *nball = ball->next != NULL ? ball->next : NULL;
         ball->power = ball->power > 0 ? ((ball->power * 4) - 1) / 4 : 0;
@@ -41,13 +41,7 @@ void loop() {
           ballCollision(ball);
 
         } else {
-          if (ball->next != NULL) {
-            ball->next->prev = ball->prev == NULL ? NULL : ball->prev;
-          }
-          if (ball->prev != NULL) {
-            ball->prev->next = ball->next == NULL ? NULL : ball->next;
-          }
-          ball = NULL;
+          removeBall( ball );
         }
         
         if ( ball != NULL ) {
@@ -55,13 +49,13 @@ void loop() {
             drawBall( ball );
           }
         }
+
+        if ( !(ball->number) && !(ball->power) ) {
+          shootCue( ball );
+        }
+        
         ball = nball;
       }
-    }
-
-    // LAUNCH BALL
-    if (ball_list[0]->power == 0) {
-      shootCue( ball_list[0] );
     }
   }
 }
