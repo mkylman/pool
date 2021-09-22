@@ -23,24 +23,23 @@ void loop() {
     Ball *ball;
     for (int i = 0; i < 4; i++) {
       ball = ball_list[i];
-      while ( ball != NULL ){
+      while ( ball != NULL ) {
         Ball *nball = ball->next != NULL ? ball->next : NULL;
         ball->power = ball->power > 0 ? ((ball->power * 4) - 1) / 4 : 0;
+      
+        // MOVE BALLS
+        moveBall(ball);
         
-        if (ball->sunk != true){
-          // MOVE BALLS
-          moveBall(ball);
-          
-          // EDGE COLLISION
-          edgeCollision(ball);
+        // EDGE COLLISION
+        edgeCollision(ball);
 
-          // POCKET COLLISION
-          pocketCollision(ball);
+        // POCKET COLLISION
+        pocketCollision(ball);
 
-          // BALL COLLISION
-          ballCollision(ball);
+        // BALL COLLISION
+        ballCollision(ball);
 
-        } else {
+        if ( ball->sunk && ball->number ){
           removeBall( ball );
         }
         
