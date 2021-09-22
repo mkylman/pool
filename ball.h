@@ -30,6 +30,16 @@ Ball *makeBall( Ball *pball, uint16_t color, Vector pos, uint8_t num ) {
   return ball;
 }
 
+void removeBall( Ball *ball ) {
+  if (ball->next != NULL) {
+    ball->next->prev = ball->prev == NULL ? NULL : ball->prev;
+  }
+  if (ball->prev != NULL) {
+    ball->prev->next = ball->next == NULL ? NULL : ball->next;
+  }
+  ball = NULL;
+}
+
 void loadBalls(void) {
   uint16_t colors[7] = { YELLOW, BLUE, RED, VIOLET, ORANGE, GREEN, MAGENTA };
 
@@ -38,26 +48,29 @@ void loadBalls(void) {
   }
 
   ball_list[0] = makeBall( NULL, WHITE, { WIDTH / 2, HEIGHT - (HEIGHT / 8) }, 0 );
-  ball_list[1] = makeBall( NULL, BLACK, { WIDTH / 2, HEIGHT / 6 + ball_list[0]->radius * 4 }, 8 );
+  uint8_t radius = ball_list[0]->radius;
+  
+  ball_list[1] = makeBall( NULL, BLACK, { WIDTH / 2, HEIGHT / 6 + radius * 4 }, 8 );
+
   
   Vector sol_pos[7] = {
-    { WIDTH /2,                         HEIGHT / 6 + ball_list[0]->radius * 8 },
-    { WIDTH / 2 - ball_list[0]->radius,     HEIGHT / 6 + ball_list[0]->radius * 6 },
-    { WIDTH / 2 - ball_list[0]->radius * 3, HEIGHT / 6 + ball_list[0]->radius * 2 },
-    { WIDTH / 2 + ball_list[0]->radius,     HEIGHT / 6 + ball_list[0]->radius * 2 },
-    { WIDTH / 2 + ball_list[0]->radius * 4, HEIGHT / 6 },
-    { WIDTH / 2 - ball_list[0]->radius * 4, HEIGHT / 6 },
-    { WIDTH / 2,                        HEIGHT / 6 }
+    { WIDTH /2,               HEIGHT / 6 + radius * 8 },
+    { WIDTH / 2 - radius,     HEIGHT / 6 + radius * 6 },
+    { WIDTH / 2 - radius * 3, HEIGHT / 6 + radius * 2 },
+    { WIDTH / 2 + radius,     HEIGHT / 6 + radius * 2 },
+    { WIDTH / 2 + radius * 4, HEIGHT / 6 },
+    { WIDTH / 2 - radius * 4, HEIGHT / 6 },
+    { WIDTH / 2,              HEIGHT / 6 }
   };
 
   Vector str_pos[7] = {
-    { WIDTH / 2 + ball_list[0]->radius,     HEIGHT / 6 + ball_list[0]->radius * 6 },
-    { WIDTH / 2 - ball_list[0]->radius * 2, HEIGHT / 6 + ball_list[0]->radius * 4 },
-    { WIDTH / 2 + ball_list[0]->radius * 2, HEIGHT / 6 + ball_list[0]->radius * 4 },
-    { WIDTH / 2 + ball_list[0]->radius * 3, HEIGHT / 6 + ball_list[0]->radius * 2 },
-    { WIDTH / 2 - ball_list[0]->radius,     HEIGHT / 6 + ball_list[0]->radius * 2 },
-    { WIDTH / 2 + ball_list[0]->radius * 2, HEIGHT / 6 },
-    { WIDTH / 2 - ball_list[0]->radius * 2, HEIGHT / 6 }
+    { WIDTH / 2 + radius,     HEIGHT / 6 + radius * 6 },
+    { WIDTH / 2 - radius * 2, HEIGHT / 6 + radius * 4 },
+    { WIDTH / 2 + radius * 2, HEIGHT / 6 + radius * 4 },
+    { WIDTH / 2 + radius * 3, HEIGHT / 6 + radius * 2 },
+    { WIDTH / 2 - radius,     HEIGHT / 6 + radius * 2 },
+    { WIDTH / 2 + radius * 2, HEIGHT / 6 },
+    { WIDTH / 2 - radius * 2, HEIGHT / 6 }
   };
   
   if (ball_list[2] != NULL && ball_list[3] != NULL) {
@@ -187,7 +200,7 @@ void ballCollision(Ball *ball) {
         c = c ? c : 0.1;
         if ( c < ball->radius * 2 ) {
           launchBall( ball2, ball->pos, ball2->pos,
-                      ball->power ? ball->power - (ball->power / 4) : ball2->power - (ball2->power / 4) );
+                      ball->power ? ball->power - (ball->power / 8) : ball2->power );
           
           ball->vel.x -= ball2->vel.x;
           ball->vel.y -= ball2->vel.y;
@@ -202,6 +215,8 @@ void shootCue(Ball *ball) {
   Point p = getPoint();
 
   if ( p.touched ) {
+    drawBalls();
+    
     uint8_t dist = ball->radius * 3;
     if ( ( p.x <= ball->pos.x + dist )
       && ( p.x >= ball->pos.x - dist ) 
