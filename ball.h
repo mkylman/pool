@@ -200,7 +200,7 @@ void ballCollision(Ball *ball) {
         c = c ? c : 0.1;
         if ( c < ball->radius * 2 ) {
           launchBall( ball2, ball->pos, ball2->pos,
-                      ball->power ? ball->power - (ball->power / 8) : ball2->power );
+                      ball->power ? ball->power : ball2->power );
           
           ball->vel.x -= ball2->vel.x;
           ball->vel.y -= ball2->vel.y;
@@ -216,14 +216,16 @@ void shootCue(Ball *ball) {
 
   if ( p.touched ) {
     drawBalls();
-    
+  
+    double x1, x2, y1, y2;
+    double line_x2, line_y2;
     uint8_t dist = ball->radius * 3;
+    short power = 20;
+    
     if ( ( p.x <= ball->pos.x + dist )
       && ( p.x >= ball->pos.x - dist ) 
       && ( p.y <= ball->pos.y + dist )
       && ( p.y >= ball->pos.y - dist ) ) {
-      double x1, x2, y1, y2;
-      double line_x2, line_y2;
       double a, b, c;
       
       x1 = p.x;
@@ -235,12 +237,8 @@ void shootCue(Ball *ball) {
         c = sqrt( (a*a) + (b*b) );
         c = c ? c : 0.1;
         
-        line_x2 = ball[0].pos.x;
-        line_y2 = ball[0].pos.y;
-        for (int i = 0; i < 200; i++) {
-          line_x2 += (a / c);
-          line_y2 += (b / c);
-        }
+        line_x2 = ball[0].pos.x + (a / c) * 200;
+        line_y2 = ball[0].pos.y + (b / c) * 200;
 
         //tft.drawPixel( x2, y2, GREEN );
         tft.drawLine( ball[0].pos.x, ball[0].pos.y, line_x2, line_y2, BLACK );
@@ -255,40 +253,39 @@ void shootCue(Ball *ball) {
       tft.drawLine( ball[0].pos.x, ball[0].pos.y, line_x2, line_y2, BLACK );
       
       unsigned long ms2 = millis();
-      short power = 0;
-      bool inc = true;
+      
       while ( !p.touched ) {
         p = getPoint();
-        
-        while ( p.touched ) {
-          if ( ( p.x <= ball->pos.x + dist )
-          && ( p.x >= ball->pos.x - dist ) 
-          && ( p.y <= ball->pos.y + dist )
-          && ( p.y >= ball->pos.y - dist ) ) {
-            tft.drawLine( ball[0].pos.x, ball[0].pos.y, line_x2, line_y2, DGREEN );
-            shootCue( ball );
-          }
-          if ( (millis() - ms2) >= 200 ) {
-            if ( power >= 40 ) inc = false;
-            if ( power <= 2 )  inc = true;
-            if (inc) {
-              power += 2;
-              tft.drawRect( 0, 0, 10, 40 * 3, WHITE );
-              tft.fillRect( 0, 0, 10, power * 3, WHITE );
+      }
+      
+      while ( p.touched ) {
+        if ( ( p.x <= ball->pos.x + dist )
+        && ( p.x >= ball->pos.x - dist ) 
+        && ( p.y <= ball->pos.y + dist )
+        && ( p.y >= ball->pos.y - dist ) ) {
+          tft.drawLine( ball[0].pos.x, ball[0].pos.y, line_x2, line_y2, DGREEN );
+          shootCue( ball );
+        } else {
+          if ( (millis() - ms2) >= 500 ) {
+            if ( power < 50) {
+              power += 1;
+              tft.drawRect( 0, 0, 10, 30 * 3, WHITE );
+              tft.fillRect( 0, 0, 10, (power - 20) * 3, WHITE );
             } else {
-              tft.fillRect( 0, 0, 10, 40 * 3, RED );
-              power = 2;
+              tft.fillRect( 0, 0, 10, 30 * 3, RED );
+              power = 20;
             }
       
             ms2 = millis();
+        
+            Serial.println(power);
           }
-          p = getPoint();
         }
-        if (power != 0)
-          break;
+        p = getPoint();
       }
+
       tft.drawLine( ball[0].pos.x, ball[0].pos.y, line_x2, line_y2, DGREEN );
-      tft.fillRect( 0, 0, 10, 40 * 3, RED );
+      tft.fillRect( 0, 0, 10, 30 * 3, RED );
       launchBall( ball, { x1, y1 }, { x2, y2 }, power );
     }
   }
