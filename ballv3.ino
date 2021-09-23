@@ -4,6 +4,7 @@
 #include "ball.h"
 
 void setup() {
+  //Serial.begin(9600);
   tft.begin( tft.readID() );
   tft.fillScreen( DGREEN );
 
@@ -16,7 +17,7 @@ void setup() {
 void loop() {
   static unsigned long ms = millis();
   
-  if (millis() - ms >= 1000 / 60) { // "fps"
+  if (millis() - ms >= 1000 / 30) { // "fps"
     ms = millis();
 
     // DRAW, MOVE BALLS, COLLISION CHECKS
@@ -25,7 +26,7 @@ void loop() {
       ball = ball_list[i];
       while ( ball != NULL ) {
         Ball *nball = ball->next != NULL ? ball->next : NULL;
-        ball->power = ball->power > 0 ? ((ball->power * 4) - 1) / 4 : 0;
+        ball->power = ball->power > 0 ? ((ball->power * 5) - 1) / 5 : 0;
       
         // MOVE BALLS
         moveBall(ball);
