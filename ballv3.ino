@@ -4,7 +4,7 @@
 #include "ball.h"
 
 void setup() {
-  //Serial.begin(9600);
+  Serial.begin(9600);
   tft.begin( tft.readID() );
   tft.fillScreen( DGREEN );
 
@@ -17,7 +17,7 @@ void setup() {
 void loop() {
   static unsigned long ms = millis();
   
-  if (millis() - ms >= 1000 / 30) { // "fps"
+  if (millis() - ms >= 1000 / 24) { // "fps"
     ms = millis();
 
     // DRAW, MOVE BALLS, COLLISION CHECKS
