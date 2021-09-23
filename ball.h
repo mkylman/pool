@@ -223,38 +223,73 @@ void shootCue(Ball *ball) {
       && ( p.y <= ball->pos.y + dist )
       && ( p.y >= ball->pos.y - dist ) ) {
       double x1, x2, y1, y2;
+      double line_x2, line_y2;
       double a, b, c;
-      unsigned long ms2 = millis();
-      short power = 2;
-      bool inc = true;
       
       x1 = p.x;
       y1 = p.y;
       
       while ( p.touched ) {
-        if ( (millis() - ms2) >= 200 ) {
-          if ( power >= 50 ) inc = false;
-          if ( power <= 2 ) inc = true;
-          if (inc) {
-            power += 2;
-            tft.drawRect( 0, 0, 10, 50 * 3, WHITE );
-            tft.fillRect( 0, 0, 10, power * 3, WHITE );
-          } else {
-            tft.fillRect( 0, 0, 10, 50 * 3, RED );
-            power = 2;
-          }
-
-          ms2 = millis();
+        a = p.x - x1;
+        b = p.y - y1;
+        c = sqrt( (a*a) + (b*b) );
+        c = c ? c : 0.1;
+        
+        line_x2 = ball[0].pos.x;
+        line_y2 = ball[0].pos.y;
+        for (int i = 0; i < 200; i++) {
+          line_x2 += (a / c);
+          line_y2 += (b / c);
         }
+
+        //tft.drawPixel( x2, y2, GREEN );
+        tft.drawLine( ball[0].pos.x, ball[0].pos.y, line_x2, line_y2, BLACK );
+        tft.drawLine( ball[0].pos.x, ball[0].pos.y, line_x2, line_y2, DGREEN );
         
         x2 = p.x;
         y2 = p.y;
         p = getPoint();
       }
-      tft.fillRect( 0, 0, 10, 50 * 3, RED );
-      launchBall( ball, { x1, y1 }, { x2, y2 }, power );
       drawPockets();
       drawBalls();
+      tft.drawLine( ball[0].pos.x, ball[0].pos.y, line_x2, line_y2, BLACK );
+      
+      unsigned long ms2 = millis();
+      short power = 0;
+      bool inc = true;
+      while ( !p.touched ) {
+        p = getPoint();
+        
+        while ( p.touched ) {
+          if ( ( p.x <= ball->pos.x + dist )
+          && ( p.x >= ball->pos.x - dist ) 
+          && ( p.y <= ball->pos.y + dist )
+          && ( p.y >= ball->pos.y - dist ) ) {
+            tft.drawLine( ball[0].pos.x, ball[0].pos.y, line_x2, line_y2, DGREEN );
+            shootCue( ball );
+          }
+          if ( (millis() - ms2) >= 200 ) {
+            if ( power >= 40 ) inc = false;
+            if ( power <= 2 )  inc = true;
+            if (inc) {
+              power += 2;
+              tft.drawRect( 0, 0, 10, 40 * 3, WHITE );
+              tft.fillRect( 0, 0, 10, power * 3, WHITE );
+            } else {
+              tft.fillRect( 0, 0, 10, 40 * 3, RED );
+              power = 2;
+            }
+      
+            ms2 = millis();
+          }
+          p = getPoint();
+        }
+        if (power != 0)
+          break;
+      }
+      tft.drawLine( ball[0].pos.x, ball[0].pos.y, line_x2, line_y2, DGREEN );
+      tft.fillRect( 0, 0, 10, 40 * 3, RED );
+      launchBall( ball, { x1, y1 }, { x2, y2 }, power );
     }
   }
 }
