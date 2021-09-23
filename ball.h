@@ -277,8 +277,6 @@ void shootCue(Ball *ball) {
             }
       
             ms2 = millis();
-        
-            Serial.println(power);
           }
         }
         p = getPoint();
