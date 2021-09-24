@@ -4,6 +4,10 @@
 Requires Adafruit_GFX, Adafruit Touchscreen, and MCUFRIEND_kbv libraries
 Adjust pin and point mapping in point.h
 
+
+https://www.youtube.com/watch?v=HvlHeZh_OiI&list=PLKe_-NZKlS9rj8NIvXMHUFk0JC5LJtnIf
+
+
 09/24/2021
 Added game logic.
 
@@ -23,10 +27,10 @@ Added game logic.
 
 Game loop has been adjusted a little bit, to alternate between players and not allow for next turn until all balls have stopped moving.
 
-Aiming mechanic changed again. Now you don't have to touch the ball, you touch anywhere and a line is drawn from the ball to the point.
-That point is also used to calculate launch ball. Not only do I think this works better, I was able to eliminate a sqrt call.
-
-Also added a ghost ball when aiming, and an estimate line of how the shot may go, but it's not perfect as the ghost ball can overlap the real ball
+Aiming mechanic changed again.
+---Now you don't have to touch the ball, you touch anywhere and a line is drawn from the ball to the point.
+---That point is used in launchBall() calculation. Works better and is less code.
+---Added ghost ball. If ghost collides with a ball an estimate line of how the shot may go is drawn. It's not perfect as the ghost can overlap the real.
 
 Still some odd bugs with the touchscreen not registering sometimes, or registering incorrectly at other times.
 
