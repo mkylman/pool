@@ -1,6 +1,9 @@
 # pool
   ST7793 TFT LCD and Arduino UNO Pool sim/game
 
+Requires Adafruit_GFX, Adafruit Touchscreen, and MCUFRIEND_kbv libraries
+Adjust pin and point mapping in point.h
+
 09/24/2021
 Added game logic.
   The game now has 2 players (although it could be played alone)
