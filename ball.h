@@ -120,12 +120,7 @@ void launchBall(Ball *ball, Vector pos1, Vector pos2, short power) {
 
   ball->vel.x = (a / c);
   ball->vel.y = (b / c);
-
-/*  
-  tft.drawLine( ball->pos.x, ball->pos.y,
-                ball->pos.x + ball->vel.x * 100,
-                ball->pos.y + ball->vel.y * 100, BLACK );
-*/  
+  
   ball->power = power;
 }
 
@@ -155,13 +150,17 @@ void edgeCollision(Ball *ball) {
   }
 }
 
+float getDist( Vector pos1, Vector pos2 ) {
+  double a = pos1.x - pos2.x; 
+  double b = pos1.y - pos2.y;
+  float  c = sqrt( (a*a) + (b*b) );
+  
+  return (c ? c : 0.1);
+}
+
 void pocketCollision(Ball *ball) {
   for (int i = 0; i < 6; i++) {
-    double a = ball->pos.x - pocket[i].pos.x;
-    double b = ball->pos.y - pocket[i].pos.y;
-    float  c = sqrt( (a*a) + (b*b) );
-    c = c ? c : 0.1;
-    if ( c <= pocket[i].radius + ball->radius ) {
+    if ( getDist( ball->pos, pocket[i].pos ) <= pocket[i].radius + ball->radius ) {
       ball->sunk = true;
       tft.fillCircle(ball->old_pos.x, ball->old_pos.y, ball->radius, DGREEN);
     }
@@ -173,11 +172,7 @@ void ballCollision(Ball *ball) {
     Ball *ball2 = ball_list[j];
     while ( ball2 != NULL ){
       if ( ball != ball2 && ball2->sunk != true ) {
-        double a = ball2->pos.x - ball->pos.x;
-        double b = ball2->pos.y - ball->pos.y;
-        float  c = sqrt( (a*a) + (b*b) );
-        c = c ? c : 0.1;
-        if ( c < ball->radius * 2 ) {
+        if ( getDist( ball2->pos, ball->pos ) <= ball->radius * 2 ) {
           launchBall( ball2, ball->pos, ball2->pos,
                       ball->power ? ball->power : ball2->power );
           
@@ -200,10 +195,7 @@ void placeCue(Ball *ball) {
       for (int i = 1; i < 4; i++) {
         Ball *check = ball_list[i];
         while (check != NULL && valid) {
-          double a = p.x - check->pos.x;
-          double b = p.y - check->pos.y;
-          float c = sqrt( (a*a) + (b*b) );
-          if ( c <= check->radius * 2 ) {
+          if ( getDist( { p.x, p.y }, check->pos ) <= check->radius * 2 ) {
             valid = false;
           }
           check = check->next;
@@ -218,29 +210,29 @@ void aimCue( Vector *p1, Vector *p2, Vector *p3, Vector *p4, Ball *ball ) {
   Point p = getPoint();
   
   while ( !p.touched ) { p = getPoint(); }
-  
+
   if ( p.touched ) {
+    
     while ( p.touched ) {
       p2->x = p.x;
       p2->y = p.y;
       
       tft.drawLine( p1->x, p1->y, p2->x, p2->y, BLACK );
       tft.drawLine( p1->x, p1->y, p2->x, p2->y, DGREEN );
-      tft.drawCircle( p2->x, p2->y, ball->radius, WHITE );
+      tft.drawCircle( p2->x, p2->y, ball->radius, WHITE ); // ghost ball
       tft.drawCircle( p2->x, p2->y, ball->radius, DGREEN );
-      
-      for (int i = 1; i < 4; i++) {
+
+      for (int i = 1; i < 4; i++) { // check if ghost ball "collided", draw estimated trajectory
         Ball *ball2 = ball_list[i];
         while (ball2 != NULL) {
-          double a = ball2->pos.x - p2->x;
-          double b = ball2->pos.y - p2->y;
-          float c = sqrt( (a*a) + (b*b) );
-          c = c ? c : 0.1;
-          if (c <= ball2->radius * 2) {
+          
+          float c = getDist( ball2->pos, { p2->x, p2->y } );
+
+          if ( c <= ball2->radius * 2 ) {
             p3->x = ball2->pos.x;
             p3->y = ball2->pos.y;
-            p4->x = p3->x + (a / c) * 200;
-            p4->y = p3->y + (b / c) * 200;
+            p4->x = p3->x + ( (p3->x - p2->x) / c) * 200;
+            p4->y = p3->y + ( (p3->y - p2->y) / c) * 200;
             tft.drawLine( p3->x, p3->y, p4->x, p4->y, BLACK );
             tft.drawLine( p3->x, p3->y, p4->x, p4->y, DGREEN );
           }
@@ -251,6 +243,7 @@ void aimCue( Vector *p1, Vector *p2, Vector *p3, Vector *p4, Ball *ball ) {
       p = getPoint();
     }
     drawBalls();
+    
     tft.drawLine( p1->x, p1->y, p2->x, p2->y, BLACK );
     tft.drawCircle( p2->x, p2->y, ball->radius, WHITE );
     tft.drawLine( p3->x, p3->y, p4->x, p4->y, BLACK );
@@ -301,10 +294,7 @@ bool shootCue(Ball *ball) {
 
   while ( true ) {
     if ( p.touched ) {
-      double a = p.x - p2.x;
-      double b = p.y - p2.y;
-      float c = sqrt( (a*a) + (b*b) );
-      if ( c <= ball->radius * 3 ) {
+      if ( getDist( { p.x, p.y }, p2 ) <= ball->radius * 3 ) {
         tft.drawLine( p1.x, p1.y, p2.x, p2.y, DGREEN );
         tft.drawCircle( p2.x, p2.y, ball->radius, DGREEN );
         tft.drawLine( p3.x, p3.y, p4.x, p4.y, DGREEN );

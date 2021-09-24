@@ -3,6 +3,7 @@
 #include "pool.h"
 
 void setup() {
+  //Serial.begin(9600);
   tft.begin( tft.readID() );
   tft.fillScreen( DGREEN );
 
@@ -27,8 +28,11 @@ void loop() {
       Ball *ball = ball_list[0];
 
       Point point = getPoint();
+      
       drawPockets(p);
+      
       while ( !point.touched ) { point = getPoint(); }
+      
       if ( !(ball->number) && !(ball->power) ) {
         while (ball->sunk) { placeCue( ball ); }
         while ( !shootCue( ball ) );
