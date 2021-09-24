@@ -28,6 +28,7 @@ uint8_t getXP(void){
   digitalWrite(_xm, LOW);
 
   for (int i = 0; i < 2; i++) {
+    analogRead(_yp);
     samples[i] = analogRead(_yp);
   }
   
@@ -49,6 +50,7 @@ uint16_t getYP(void){
   digitalWrite(_ym, LOW);
 
   for (int i = 0; i < 2; i++) {
+    analogRead(_xm);
     samples[i] = analogRead(_xm);
   }
   
@@ -89,6 +91,6 @@ Point getPoint(void) {
   point.y = getYP();
   point.touched = touched();
   pinMode(_yp, OUTPUT);      // restore shared pins
-  pinMode(_xm, OUTPUT);      // wouldn't draw without this
+  pinMode(_xm, OUTPUT);      // wouldn't resume drawing without this
   return point;
 }
