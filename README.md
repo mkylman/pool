@@ -23,20 +23,16 @@ Added game logic.
 
 Game loop has been adjusted a little bit, to alternate between players and not allow for next turn until all balls have stopped moving.
 
+Aiming mechanic changed again. Now you don't have to touch the ball, you touch anywhere and a line is drawn from the ball to the point.
+That point is also used to calculate launch ball. Not only do I think this works better, I was able to eliminate a sqrt call.
+
+Also added a ghost ball when aiming, and an estimate line of how the shot may go, but it's not perfect as the ghost ball can overlap the real ball
+
 Still some odd bugs with the touchscreen not registering sometimes, or registering incorrectly at other times.
 
 Shot power is still off a little.
 
 Friction might still be a little too strong.
-
-Lots of moments feel good though.
-
-I found it very satisfying when a shot lined up and I sunk a ball.
-
-I mostly find the ball movements and collisions to feel like what I remember, even with the friction and shot power still being not quite right.
-
-But there were moments where it would register collision on the opposite side, because the ball had moved so many pixels that frame
-To try and fix this, in the ballMove function's calculation I divide power by 2 or so.
 
 
 
