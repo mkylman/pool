@@ -6,9 +6,9 @@ typedef struct {
 
 Player player[2] = { { false, false, true }, { false, false, true } };
 
-void playerLabel(const char *s) {
+void playerLabel(const char *s, int ypos) {
   int len = strlen(s) * 6;
   tft.setTextColor(WHITE, RED);
-  tft.setCursor((WIDTH - len) / 2, BORDER / 4);
+  tft.setCursor((WIDTH - len) / 2, ypos);
   tft.print(s);
 }

@@ -66,6 +66,7 @@ void loop() {
                   ball->vel.y = 0;
                   ball->power = 0;
                   turn = false;
+                  shot_made = false;
                   if ( (player[p].solid && ball_list[2] == NULL) || (player[p].stripe && ball_list[3] == NULL) ) {
                     putText( p ? "Player 2 loses!" : "Player 1 loses!" );
                     resetFunc();

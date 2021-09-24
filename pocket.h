@@ -35,7 +35,8 @@ void drawPockets(uint8_t p) {
   tft.fillRect( 0, 0, WIDTH, BORDER, RED );
   tft.fillRect( 0, HEIGHT-BORDER, WIDTH, BORDER, RED );
 
-  playerLabel( player[p].choice ? "CHOICE" : (player[p].solid ? "SOLID" : "STRIPE") );
+  playerLabel( player[p].choice ? "CHOICE" : (player[p].solid ? "SOLIDS" : "STRIPES"), BORDER / 4 );
+  playerLabel( p ? "Player 2" : "Player 1", HEIGHT - BORDER / 2 );
 
   for (int i = 0; i < 6; i++){
     drawPocket( &pocket[i] );
