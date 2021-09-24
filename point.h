@@ -77,11 +77,14 @@ bool touched(void) {
   int z1 = analogRead(_xm);
   int z2 = analogRead(_yp);
 
-  return (1023 - (z2 - z1) > 200) ? true : false;
+  return (1023 - (z2 - z1) > 300) ? true : false;
 }
 
 Point getPoint(void) {
   Point point;
+  point.x = getXP();
+  point.y = getYP();
+  point.touched = touched();
   point.x = getXP();
   point.y = getYP();
   point.touched = touched();
