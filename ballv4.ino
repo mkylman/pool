@@ -30,8 +30,8 @@ void loop() {
       drawPockets(p);
       while ( !point.touched ) { point = getPoint(); }
       if ( !(ball->number) && !(ball->power) ) {
-        if (ball->sunk) placeCue( ball );
-        shot_taken = shootCue( ball );
+        while (ball->sunk) { placeCue( ball ); }
+        while ( !shootCue( ball ) );
         drawPockets(p);
       }
       
@@ -45,7 +45,7 @@ void loop() {
             ball = ball_list[i] != NULL ? ball_list[i] : NULL;
             while ( ball != NULL ) {
               Ball *nball = ball->next != NULL ? ball->next : NULL;
-              ball->power = ball->power > 0 ? ((ball->power * 5) - 1) / 5 : 0;
+              ball->power = ball->power > 0 ? ((ball->power * 10) - 1) / 10 : 0;
             
               // MOVE BALLS
               moveBall(ball);
