@@ -36,7 +36,7 @@ void loop() {
       }
       
       do {
-        if (millis() - ms >= 1000 / 24) { // "fps"
+        if (millis() - ms >= 1000 / 30) { // "fps"
           ms = millis();
     
           // DRAW, MOVE BALLS, COLLISION CHECKS
