@@ -228,11 +228,14 @@ void aimCue( Vector *p1, Vector *p2, Vector *p3, Vector *p4, Ball *ball ) {
           
           float c = getDist( ball2->pos, { p2->x, p2->y } );
 
-          if ( c <= ball2->radius * 2 ) {
+          if ( c <= ball2->radius * 2 && c >= ball2->radius ) {
             p3->x = ball2->pos.x;
             p3->y = ball2->pos.y;
-            p4->x = p3->x + ( (p3->x - p2->x) / c) * 200;
-            p4->y = p3->y + ( (p3->y - p2->y) / c) * 200;
+            p4->x = p3->x;
+            p4->y = p3->y;
+            
+            p4->x += ( (p3->x - p2->x) / c ) * 40; // length of estimate line
+            p4->y += ( (p3->y - p2->y) / c ) * 40; // 
             tft.drawLine( p3->x, p3->y, p4->x, p4->y, BLACK );
             tft.drawLine( p3->x, p3->y, p4->x, p4->y, DGREEN );
           }
