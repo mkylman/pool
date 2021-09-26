@@ -15,11 +15,11 @@ Pocket makePocket( Vector pos, uint8_t radius  ) {
 
 void loadPockets(void) {
   // POCKETS
-  pocket[0] = makePocket( { BORDER, BORDER }, 16 );
-  pocket[1] = makePocket( { WIDTH - BORDER, BORDER }, 16 );
+  pocket[0] = makePocket( { BORDER, BORDER }, 14 );
+  pocket[1] = makePocket( { WIDTH - BORDER, BORDER }, 14 );
   pocket[2] = makePocket( { BORDER - pocket[1].radius / 2, HEIGHT/2 }, 14 );
-  pocket[3] = makePocket( { BORDER, HEIGHT - BORDER }, 16 );
-  pocket[4] = makePocket( { WIDTH - BORDER, HEIGHT - BORDER }, 16 );
+  pocket[3] = makePocket( { BORDER, HEIGHT - BORDER }, 14 );
+  pocket[4] = makePocket( { WIDTH - BORDER, HEIGHT - BORDER }, 14 );
   pocket[5] = makePocket( { WIDTH - BORDER + pocket[1].radius / 2, HEIGHT/2 }, 14 );
 }
 

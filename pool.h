@@ -15,6 +15,13 @@ void putText(const char *s) {
   drawBalls();
 }
 
+void putText2(const char *s, unsigned int ypos) {
+  int len = strlen(s) * 6;
+  tft.setTextColor(WHITE, BLACK);
+  tft.setCursor((WIDTH - len) / 2, ypos);
+  tft.print(s);
+}
+
 uint8_t balls_moving(void){
   uint8_t moving = 0;
   for (int i = 0; i < 4; i++) {

@@ -17,6 +17,7 @@ void(* resetFunc)(void) = 0;
 
 void loop() {
   static unsigned long ms = millis();
+  static unsigned short shot_count = 0;
   for (int p = 0; p < 2; p++) {
     
     putText( p ? "Player 2" : "Player 1" );
@@ -40,6 +41,7 @@ void loop() {
           placeCue( ball );
         }
         while ( !shootCue( ball ) );
+        shot_count += 1;
         drawPockets(p);
       }
       
@@ -67,6 +69,7 @@ void loop() {
               // BALL COLLISION
               ballCollision(ball);
 
+              // SUNK BALL ROUTINE
               if ( ball->sunk ) {
                 if (ball->number == 0) {
                   ball->old_pos = ball->pos;
@@ -76,7 +79,9 @@ void loop() {
                   turn = false;
                   shot_made = false;
                   if ( (player[p].solid && ball_list[2] == NULL) || (player[p].stripe && ball_list[3] == NULL) ) {
-                    putText( p ? "Player 2 loses!" : "Player 1 loses!" );
+                    putText2( p ? "Player 2" :"Player 1", HEIGHT / 2 );
+                    putText2( "scratched on the 8 and lost!", HEIGHT / 2 + HEIGHT / 8 );
+                    delay(2000);
                     resetFunc();
                   }
                 } else {
@@ -106,12 +111,29 @@ void loop() {
                   if ( ball->number == 8 ) {
                     if ( ( player[p].solid && ball_list[2] == NULL )
                       || ( player[p].stripe && ball_list[3] == NULL ) ){
-                      putText( p ? "Player 2 wins!" : "Player 1 wins!" );
+                      putText2( p ? "Player 2 wins!" : "Player 1 wins!", HEIGHT / 2 );
+                      delay(2000);
+                      resetFunc();
+                    } else if ( shot_count == 1 ) {
+                      putText2("Wow I can't believe it!", HEIGHT / 2 - HEIGHT / 8);
+                      putText2( p ? "Player 2" : "Player 1", HEIGHT / 2 );
+                      putText2( "sank the 8 on the first shot and won!", HEIGHT / 2 + HEIGHT / 8 );
+                      delay(2000);
                       resetFunc();
                     } else {
-                      putText( p ? "Player 2 loses!" : "Player 1 loses!" );
+                      putText2( p ? "Player 2" : "Player 1", HEIGHT / 2 );
+                      putText2( "sunk the 8 and lost!", HEIGHT / 2 + HEIGHT / 8);
+                      delay(2000);
                       resetFunc();
                     }
+                  } else {
+                    if ( ( player[p].solid && ball_list[2] == NULL )
+                      || ( player[p].stripe && ball_list[3] == NULL ) ){
+                        putText2( p ? "Player 2" :"Player 1", HEIGHT / 2 );
+                        putText2( "scratched on the 8 and lost!", HEIGHT / 2 + HEIGHT / 8 );
+                        delay(2000);
+                        resetFunc();
+                      }
                   }
                     
                   if (ball->next != NULL) {
