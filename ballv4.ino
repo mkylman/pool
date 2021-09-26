@@ -30,11 +30,15 @@ void loop() {
       Point point = getPoint();
       
       drawPockets(p);
+      playerLabel( "Touch & drag to aim", WIDTH, HEIGHT - BORDER / 2 );
       
       while ( !point.touched ) { point = getPoint(); }
       
       if ( !(ball->number) && !(ball->power) ) {
-        while (ball->sunk) { placeCue( ball ); }
+        while (ball->sunk) { 
+          playerLabel( "Touch to place cue", WIDTH, HEIGHT - BORDER / 2 );
+          placeCue( ball );
+        }
         while ( !shootCue( ball ) );
         drawPockets(p);
       }
@@ -49,17 +53,17 @@ void loop() {
             ball = ball_list[i] != NULL ? ball_list[i] : NULL;
             while ( ball != NULL ) {
               Ball *nball = ball->next != NULL ? ball->next : NULL;
-              ball->power = ball->power > 0 ? ((ball->power * 10) - 1) / 10 : 0;
-            
+              ball->power = ball->power > 0 ? ((ball->power * 20) - 1) / 20 : 0;
+
               // MOVE BALLS
               moveBall(ball);
-              
+
               // EDGE COLLISION
               edgeCollision(ball);
-      
+
               // POCKET COLLISION
               pocketCollision(ball);
-      
+
               // BALL COLLISION
               ballCollision(ball);
 
