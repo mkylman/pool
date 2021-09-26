@@ -7,6 +7,17 @@ Adjust pin and point mapping in point.h
 
 https://www.youtube.com/watch?v=HvlHeZh_OiI&list=PLKe_-NZKlS9rj8NIvXMHUFk0JC5LJtnIf
 
+09/26/2021
+Added some more game logic
+
+---if you sink the 8 on break, you win
+
+---if you sink an opponent's ball when on the 8, you lose
+
+
+Added ghost ball aim snapping/aim assist/fine aim. Basically, the ghost ball snaps to a target ball and unsnaps when you pull far enough away,
+allowing for finer aim on the target ball. Again, an estimate line is drawn but it's not 100% accurate. There's some comments in the code about it in the
+aimCue() function in ball.h
 
 09/24/2021
 Added game logic.
