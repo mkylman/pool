@@ -7,6 +7,13 @@ Adjust pin and point mapping in point.h
 
 https://www.youtube.com/watch?v=HvlHeZh_OiI&list=PLKe_-NZKlS9rj8NIvXMHUFk0JC5LJtnIf
 
+09/27/2021
+
+Tweaked the velocity, power(acceleration), and friction parameters by figuring out the m/s to px/s conversion.
+Based on a 7ft pool table vs the number of pixels on the screen, then made power range from 200cm/s to 1000cm/s, which is roughly the range of pool ball speeds.
+This power gets divided by the tick and then multiplied by velocity in moveBall(). Power is adjusted once every tick as well, just subtracting 10 each tick.
+Movement is smooth, excluding on break when all balls are moving.
+
 09/26/2021
 Added some more game logic
 
