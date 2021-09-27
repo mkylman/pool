@@ -5,8 +5,8 @@ typedef struct Ball {
   uint16_t color;
   Vector   pos;
   Vector   old_pos;
-  Vector   vel;
-  short    power;
+  Vector   vel;   // direction
+  uint16_t power; // acceleration/speed in cm/s - 0 to 1000
   uint8_t  radius;
   bool     sunk;
 } Ball;
@@ -110,25 +110,27 @@ void drawBalls(void) {
   }
 }
 
-void launchBall(Ball *ball, Vector pos1, Vector pos2, short power) {
+void launchBall(Ball *ball, Vector pos1, Vector pos2, uint16_t power) {
   double a, b, c;
   
   a = pos2.x - pos1.x;
   b = pos2.y - pos1.y;
   c = sqrt( (a*a) + (b*b) );
-  c = c ? c : 0.1;
-
-  ball->vel.x = (a / c);
-  ball->vel.y = (b / c);
+  c = c ? c : 0.1;       // values of vel.x and vel.y will be between -1 and 1 after we divide them by the distance
+  ball->vel.x = (a / c); // normalizing the pair, such that sqrt(vel.x ^ 2 + vel.y ^ 2) = 1
+  ball->vel.y = (b / c); // here we are calculating the angle at which we will move
+                         // these values times power will yield our pixels per 33.3ms (1000/30)
+                         // values will be between -1 and 1
   
   ball->power = power;
 }
 
 void moveBall(Ball *ball){
   ball->old_pos.x = ball->pos.x;
-  ball->old_pos.y = ball->pos.y;
-  ball->pos.x += ball->vel.x * (ball->power / 2);
-  ball->pos.y += ball->vel.y * (ball->power / 2);
+  ball->old_pos.y = ball->pos.y;                   // 1m/s = 180px/s -> 33ms tick, 6px/tick | 17ms tick, 3px/tick
+  ball->pos.x += ball->vel.x * (ball->power / 60); // divide by 60, tick is 1000/120ms
+  ball->pos.y += ball->vel.y * (ball->power / 60); // and power is cm/s...
+  
 }
 
 void edgeCollision(Ball *ball) {
@@ -171,8 +173,8 @@ void ballCollision(Ball *ball) {
   for (int j = 0; j < 4; j++) {
     Ball *ball2 = ball_list[j];
     while ( ball2 != NULL ){
-      if ( ball != ball2 && ball2->sunk != true ) {
-        if ( getDist( ball2->pos, ball->pos ) <= 1 + ball->radius * 2 ) {
+      if ( ball->number != ball2->number && ball2->sunk != true ) {
+        if ( getDist( ball2->pos, ball->pos ) <= ball->radius * 2 ) {
           launchBall( ball2, ball->pos, ball2->pos,
                       ball->power ? ball->power : ball2->power );
           
@@ -262,7 +264,7 @@ void aimCue( Vector *p2, Ball *ball ) {
             playerLabel( "   Fine Aiming Mode   ", WIDTH, HEIGHT - BORDER / 2 );
 
             // While we're touching screen and we stay close enough to the target(4 ball distance) aim will stay snapped
-            while( p.touched && getDist( ball2->pos, { p.x, p.y } ) <= ball2->radius * 8 ) {
+            while( p.touched && getDist( ball2->pos, { p.x, p.y } ) <= ball2->radius * 10 ) {
               double a = p.x - x1;                          // Determine ghost ball movement in relation to pointer and target
               double b = y1 < p.y ? (p.y - y1) : (y1 - p.y);// This line ensures ghost moves with pointer, instead of opposite to
               float c = sqrt( (a*a) + (b*b) );
@@ -315,23 +317,35 @@ void aimCue( Vector *p2, Ball *ball ) {
   delay(1000);
 }
 
-short shotPower(void) {
+uint16_t shotPower(void) {
   Point p = getPoint();
   unsigned long ms2 = millis();
-  short power = 20;
+  uint16_t power = 200;
 
   //while ( !p.touched ) { p = getPoint(); }
   
   while ( p.touched ) {
-    if ( (millis() - ms2) >= 300 ) {
-      if ( power < 50) {
-        power += 1;
-        tft.drawRect( 0, 0, 10, 30 * 3, WHITE );
-        tft.fillRect( 0, 0, 10, (power - 20) * 3, WHITE );
+    if ( (millis() - ms2) >= 500 ) {
+      if ( power < 500) {
+        power += 100;
+      } else if ( power < 1000 ) {
+        power += 50;
       } else {
-        tft.fillRect( 0, 0, 10, 30 * 3, RED );
-        power = 20;
+        tft.fillRect( 0, 0, 10, 100, RED );
+        power = 200;
       }
+      uint16_t color = WHITE;
+      if (power >= 200 && power <= 300) {
+        color = WHITE;
+      } else if (power > 300 && power <= 500) {
+        color = GREEN;
+      } else if (power > 500 && power <= 700) {
+        color = YELLOW;
+      } else if (power > 700) {
+        color = ORANGE;
+      }
+      tft.drawRect( 0, 0, 10, 100, WHITE );
+      tft.fillRect( 0, 0, 10, (power / 50) * 5, color );
 
       ms2 = millis();
     }
@@ -339,7 +353,7 @@ short shotPower(void) {
     p = getPoint();
   }
   
-  tft.fillRect( 0, 0, 10, 30 * 3, RED );
+  tft.fillRect( 0, 0, 10, 100, RED );
 
   return power;
 }
@@ -349,7 +363,7 @@ bool shootCue(Ball *ball) {
   Vector p1 = { ball->pos.x, ball->pos.y }; // cue ball position
   Vector p2 = { 0, 0 }; // used for ghost ball position
 
-  short power = 0;
+  uint16_t power = 0;
 
   aimCue( &p2, ball );
 
@@ -360,7 +374,7 @@ bool shootCue(Ball *ball) {
   // RE-AIM if we touch near the ghost
   while ( true ) {
     if ( p.touched ) {
-      if ( getDist( { p.x, p.y }, p2 ) <= ball->radius * 4 ) {
+      if ( getDist( { p.x, p.y }, p2 ) <= ball->radius * 6 ) {
         tft.drawLine( p1.x, p1.y, p2.x, p2.y, DGREEN );     // cue to target line
         tft.drawCircle( p2.x, p2.y, ball->radius, DGREEN ); // ghost ball
         aimCue( &p2, ball );
@@ -371,7 +385,7 @@ bool shootCue(Ball *ball) {
 
   tft.drawLine( p1.x, p1.y, p2.x, p2.y, DGREEN );     // cue to target line
   tft.drawCircle( p2.x, p2.y, ball->radius, DGREEN ); // ghost ball
-  
+
   launchBall( ball, p1, p2, power );
   return true;
 }
