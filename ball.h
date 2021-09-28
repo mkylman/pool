@@ -321,7 +321,7 @@ void aimCue( Vector *p2, Vector *p3, Vector *p4, Ball *ball ) {
           // ghost ball will snap to target and "fine" aiming can be done 
           if ( getDist( ball2->pos, { p.x, p.y } ) <= ball2->radius * 2 ) {
             
-            playerLabel( "   Fine Aiming Mode   ", WIDTH, HEIGHT - BORDER / 2 );
+            putText2( "   Fine Aiming Mode   ", HEIGHT - BORDER / 2, RED );
 
             // While we're touching screen and we stay close enough to the target(4 ball distance) aim will stay snapped
             while( p.touched && getDist( ball2->pos, { p.x, p.y } ) <= ball2->radius * 10 ) {
@@ -374,7 +374,7 @@ void aimCue( Vector *p2, Vector *p3, Vector *p4, Ball *ball ) {
     tft.drawLine( p3->x, p3->y, p4->x, p4->y, BLACK ); // estimate line
   }
 
-  playerLabel( "Press & hold for shot power", WIDTH, HEIGHT - BORDER / 2 );
+  putText2( "Press & hold for shot power", HEIGHT - BORDER / 2, RED );
   
   delay(1000);
 }
