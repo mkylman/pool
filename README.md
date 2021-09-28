@@ -14,6 +14,10 @@ Based on a 7ft pool table vs the number of pixels on the screen, then made power
 This power gets divided by the tick and then multiplied by velocity in moveBall(). Power is adjusted once every tick as well, just subtracting 10 each tick.
 Movement is smooth, excluding on break when all balls are moving.
 
+Added bank snapping and aim estimation with edge collision, so bank shots are drawn if pointer is at the edge.
+Estimate line seems more accurate with the frame rate, power/acceleration, and friction adjustments, and some of the weird "warping" collision detection issues
+that were happening before have improved or been resolved.
+
 09/26/2021
 Added some more game logic
 
