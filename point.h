@@ -17,6 +17,12 @@ typedef struct {
 } Point;
 
 // Modified from Adafruit TouchScreen.h
+uint8_t getXP(void);
+uint16_t getYP(void);
+bool touched(void);
+Point getPoint(void);
+
+// Modified from Adafruit TouchScreen.h
 uint8_t getXP(void){
   int samples[2];
   

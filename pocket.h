@@ -5,6 +5,11 @@ typedef struct {
 
 Pocket pocket[6];
 
+Pocket makePocket( Vector, uint8_t  );
+void loadPockets(void);
+void drawPocket(Pocket *);
+void drawPockets(uint8_t);
+
 Pocket makePocket( Vector pos, uint8_t radius  ) {
   Pocket pocket;
   pocket.pos.x = pos.x;
