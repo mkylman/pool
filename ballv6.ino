@@ -66,7 +66,11 @@ void loop() {
               }
 
               // FRICTION ...sort of
-              ball->power = ball->power > 100 ? ball->power - 8 : 0;
+              if (ball->power < 100) { ball->power = 0; }
+              else if (ball->power >= 100 && ball->power <= 400) { ball->power -= ball->power / 30; }
+              else if (ball->power > 400 && ball->power <= 1000) { ball->power -= ball->power / 25; }
+              else if (ball->power > 1000 && ball->power <= 1400) { ball->power -= ball->power / 20; } 
+//              ball->power = ball->power > 100 ? ball->power - (ball->power / 25) : 0;
               if (ball->power == 0) {
                 ball->vel.x = 0; ball->vel.y = 0;
               }

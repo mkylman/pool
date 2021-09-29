@@ -235,9 +235,7 @@ void placeCue(Ball *ball) {
  * aimCue( Vector *, Vector *, Ball * );
  * This function could probably be broken down into smaller functions
  * 
- * p1 is used for the cue ball position, really just to draw one line. Could probably remove it because we're already
- * passing in the cue ball so it's kind of redundant
- * p2 is used for the ghost ball position and adjusted when snapping, which translates to our "finer" adjusted final aim
+ * ghost is used for the ghost ball position and adjusted when snapping, which translates to our "finer" adjusted final aim
  * 
  * Waits until we touch the screen. When we do a line from the cue ball to where we are touching,
  * where a ghost ball is also drawn.
@@ -245,11 +243,11 @@ void placeCue(Ball *ball) {
  * If ghost collides with a ball we want to snap to its perimeter.
  * Initial contact point is stored in x1, y1
  * Ghost snapped position is calculated based on current touch point's distance from the initial contact point and the slope
- * of the line between them. Those get used to adjust ghost ball position(p2) relative to the target ball and snapped to perimeter
+ * of the line between them. Those get used to adjust ghost ball position(ghost) relative to the target ball and snapped to perimeter
  * I could only get position to work in semi-circles, so the ghost ball y position flips depending on
  * touch point position relative to initial contact point, to get the full circle
  */
-void aimCue( Vector *p2, Vector *p3, Vector *p4, Ball *ball ) {
+void aimCue( Vector *ghost, Vector *target, Vector *est_line, Ball *ball ) {
   Point p = getPoint();
   int x1, y1;
 
@@ -262,56 +260,53 @@ void aimCue( Vector *p2, Vector *p3, Vector *p4, Ball *ball ) {
       x1 = p.x;
       y1 = p.y;
       
-      p2->x = x1;
-      p2->y = y1;
+      ghost->x = x1;
+      ghost->y = y1;
+      target->x = est_line->x = 0;
+      target->y = est_line->y = 0;
+
+      // Snap aim to side rails and draw estimate
       bool hcoll = false, vcoll = false;
       if (x1 <= BORDER + ball->radius) {
-        p2->x = BORDER + ball->radius;
+        ghost->x = BORDER + ball->radius;
         hcoll = true;
       }
       
       if (x1 >= WIDTH - BORDER - ball->radius) {
-        p2->x = WIDTH - BORDER - ball->radius;
+        ghost->x = WIDTH - BORDER - ball->radius;
         hcoll = true;
       }
       
       if (y1 <= BORDER + ball->radius) {
-        p2->y = BORDER + ball->radius;
+        ghost->y = BORDER + ball->radius;
         vcoll = true;
       }
       if (y1 >= HEIGHT - BORDER - ball->radius) {
-        p2->y = HEIGHT - BORDER - ball->radius;
+        ghost->y = HEIGHT - BORDER - ball->radius;
         vcoll = true;
       }
 
       if (hcoll) {
-        double a = ball->pos.x - p2->x;
-        double b = ball->pos.y - p2->y;
+        double a = ball->pos.x - ghost->x;
+        double b = ball->pos.y - ghost->y;
         float c = sqrt( (a*a) + (b*b) );
         c = c ? c : 0.1;
-        p3->x = p2->x;
-        p3->y = p2->y;
-        p4->x = p3->x + (a / c) * 100;
-        p4->y = p3->y - (b / c) * 100;
+        target->x = ghost->x;
+        target->y = ghost->y;
+        est_line->x = target->x + (a / c) * 300;
+        est_line->y = target->y - (b / c) * 300;
       }
 
       if (vcoll) {
-        double a = ball->pos.x - p2->x;
-        double b = ball->pos.y - p2->y;
+        double a = ball->pos.x - ghost->x;
+        double b = ball->pos.y - ghost->y;
         float c = sqrt( (a*a) + (b*b) );
         c = c ? c : 0.1;
-        p3->x = p2->x;
-        p3->y = p2->y;
-        p4->x = p3->x - (a / c) * 100;
-        p4->y = p3->y + (b / c) * 100;
+        target->x = ghost->x;
+        target->y = ghost->y;
+        est_line->x = target->x - (a / c) * 300;
+        est_line->y = target->y + (b / c) * 300;
       }
-      
-      tft.drawLine( ball->pos.x, ball->pos.y, p2->x, p2->y, BLACK );
-      tft.drawLine( ball->pos.x, ball->pos.y, p2->x, p2->y, DGREEN );
-      tft.drawCircle( p2->x, p2->y, ball->radius, WHITE ); // ghost ball
-      tft.drawCircle( p2->x, p2->y, ball->radius, DGREEN );
-      tft.drawLine( p3->x, p3->y, p4->x, p4->y, BLACK ); // estimate line
-      tft.drawLine( p3->x, p3->y, p4->x, p4->y, DGREEN ); // estimate line
 
       for (int i = 1; i < 4; i++) { // check if ghost ball collided
         Ball *ball2 = ball_list[i];
@@ -324,7 +319,7 @@ void aimCue( Vector *p2, Vector *p3, Vector *p4, Ball *ball ) {
             putText2( "   Fine Aiming Mode   ", HEIGHT - BORDER / 2, RED );
 
             // While we're touching screen and we stay close enough to the target(4 ball distance) aim will stay snapped
-            while( p.touched && getDist( ball2->pos, { p.x, p.y } ) <= ball2->radius * 10 ) {
+            while( p.touched && getDist( ball2->pos, { p.x, p.y } ) <= ball2->radius * 8 ) {
               double a = p.x - x1;                          // Determine ghost ball movement in relation to pointer and target
               double b = y1 < p.y ? (p.y - y1) : (y1 - p.y);// This line ensures ghost moves with pointer, instead of opposite to
               float c = sqrt( (a*a) + (b*b) );
@@ -334,29 +329,29 @@ void aimCue( Vector *p2, Vector *p3, Vector *p4, Ball *ball ) {
               double a2 = (a / c) * (ball->radius - 1) * 2; // ghost x, snapped to target
               double b2 = (b / c) * (ball->radius - 1) * 2; // ghost y, snapped to target
 
-              p2->x = ball2->pos.x;
-              p2->y = ball2->pos.y;
+              ghost->x = ball2->pos.x;
+              ghost->y = ball2->pos.y;
               
-              p2->x += a2;
-              p2->y += (p.y < ball2->pos.y) ? -1 * b2 : b2; // if touch point is above ball, place ghost in top half
+              ghost->x += a2;
+              ghost->y += (p.y < ball2->pos.y) ? -1 * b2 : b2; // if touch point is above ball, place ghost in top half
 
-              p3->x = (ball2->pos.x - p2->x);
-              p3->y = (ball2->pos.y - p2->y);
-              float c3 = sqrt( (p3->x*p3->x) + (p3->y*p3->y) );
+              target->x = (ball2->pos.x - ghost->x);
+              target->y = (ball2->pos.y - ghost->y);
+              float c3 = sqrt( (target->x*target->x) + (target->y*target->y) );
               c3 = c3 ? c3 : 0.1;
 
-              p4->x = ball2->pos.x + (p3->x / c3) * 100;
-              p4->y = ball2->pos.y + (p3->y / c3) * 100;
+              est_line->x = ball2->pos.x + (target->x / c3) * 200;
+              est_line->y = ball2->pos.y + (target->y / c3) * 200;
 
-              p3->x = ball2->pos.x;
-              p3->y = ball2->pos.y;
-
-              tft.drawLine( ball->pos.x, ball->pos.y, p2->x, p2->y, BLACK );    // line from cue to ghost ball
-              tft.drawLine( p3->x, p3->y, p4->x, p4->y, BLACK ); // estimate line?
-              tft.drawCircle( p2->x, p2->y, ball->radius, WHITE );  // ghost ball snapped to target ball
-              tft.drawCircle( p2->x, p2->y, ball->radius, DGREEN );
-              tft.drawLine( ball->pos.x, ball->pos.y, p2->x, p2->y, DGREEN );
-              tft.drawLine( p3->x, p3->y, p4->x, p4->y, DGREEN ); // estimate line
+              target->x = ball2->pos.x;
+              target->y = ball2->pos.y;
+              
+              tft.drawLine( ball->pos.x, ball->pos.y, ghost->x, ghost->y, BLACK );    // line from cue to ghost ball
+              tft.drawLine( target->x, target->y, est_line->x, est_line->y, BLACK ); // estimate line?
+              tft.drawCircle( ghost->x, ghost->y, ball->radius, WHITE );  // ghost ball snapped to target ball
+              tft.drawCircle( ghost->x, ghost->y, ball->radius, DGREEN );
+              tft.drawLine( ball->pos.x, ball->pos.y, ghost->x, ghost->y, DGREEN );
+              tft.drawLine( target->x, target->y, est_line->x, est_line->y, DGREEN ); // estimate line
 
               p = getPoint();
             }
@@ -364,14 +359,23 @@ void aimCue( Vector *p2, Vector *p3, Vector *p4, Ball *ball ) {
           ball2 = ball2->next;
         }
       }
+
+      // draw ghost ball and estimate line while aiming
+      tft.drawLine( ball->pos.x, ball->pos.y, ghost->x, ghost->y, BLACK );
+      tft.drawLine( ball->pos.x, ball->pos.y, ghost->x, ghost->y, DGREEN );
+      tft.drawCircle( ghost->x, ghost->y, ball->radius, WHITE ); // ghost ball
+      tft.drawCircle( ghost->x, ghost->y, ball->radius, DGREEN );
+      tft.drawLine( target->x, target->y, est_line->x, est_line->y, BLACK ); // estimate line
+      tft.drawLine( target->x, target->y, est_line->x, est_line->y, DGREEN ); // estimate line
       
       p = getPoint();
     }
     drawBalls();
+    drawPockets();
     
-    tft.drawLine( ball->pos.x, ball->pos.y, p2->x, p2->y, BLACK );  // cue to target line
-    tft.drawCircle( p2->x, p2->y, ball->radius, WHITE ); // ghost ball
-    tft.drawLine( p3->x, p3->y, p4->x, p4->y, BLACK ); // estimate line
+    tft.drawLine( ball->pos.x, ball->pos.y, ghost->x, ghost->y, BLACK );  // cue to target line
+    tft.drawCircle( ghost->x, ghost->y, ball->radius, WHITE ); // ghost ball
+    tft.drawLine( target->x, target->y, est_line->x, est_line->y, BLACK ); // estimate line
   }
 
   putText2( "Press & hold for shot power", HEIGHT - BORDER / 2, RED );
@@ -381,36 +385,39 @@ void aimCue( Vector *p2, Vector *p3, Vector *p4, Ball *ball ) {
 
 uint16_t shotPower(void) {
   Point p = getPoint();
-  unsigned long ms2 = millis();
   uint16_t power = 200;
-
+  const int pwr_max = 1400;
+  const int pwr_min = 200;
+  Vector pt1 = { 0, 0 };
+  float distance;
   //while ( !p.touched ) { p = getPoint(); }
-  
+  if ( p.touched ) {
+    pt1.y = p.y;
+    pt1.x = p.x;
+  }
   while ( p.touched ) {
-    if ( (millis() - ms2) >= 500 ) {
-      if ( power < 500) {
-        power += 100;
-      } else if ( power < 1000 ) {
-        power += 50;
-      } else {
-        tft.fillRect( 0, 0, 10, 100, RED );
-        power = 200;
-      }
-      uint16_t color = WHITE;
-      if (power >= 200 && power <= 300) {
-        color = WHITE;
-      } else if (power > 300 && power <= 500) {
-        color = GREEN;
-      } else if (power > 500 && power <= 700) {
-        color = YELLOW;
-      } else if (power > 700) {
-        color = ORANGE;
-      }
-      tft.drawRect( 0, 0, 10, 100, WHITE );
-      tft.fillRect( 0, 0, 10, (power / 50) * 5, color );
 
-      ms2 = millis();
+    Vector pt2 = { p.x, p.y };
+    distance = getDist( pt1, pt2 );
+
+    power = map( distance, 0, HEIGHT - BORDER * 2, pwr_min, pwr_max ); 
+    
+    uint16_t color = WHITE;
+    if (power >= 200 && power <= 400) {
+      color = WHITE;
+    } else if (power > 400 && power <= 600) {
+      color = BLUE;
+    } else if (power > 600 && power <= 800) {
+      color = YELLOW;
+    } else if (power > 800 && power <= 1000) {
+      color = ORANGE;
+    } else if (power > 1000) {
+      color = MAGENTA;
     }
+  
+    tft.fillRect( 0, 0, 10, 100, RED );  
+    tft.drawRect( 0, 0, 10, 100, WHITE );
+    tft.fillRect( 0, 0, 10, map(power, pwr_min, pwr_max, 0, 100), color);
 
     p = getPoint();
   }
@@ -423,13 +430,13 @@ uint16_t shotPower(void) {
 bool shootCue(Ball *ball) {
 
   Vector p1 = { ball->pos.x, ball->pos.y }; // cue ball position
-  Vector p2 = { 0, 0 }; // used for ghost ball position
-  Vector p3 = { 0, 0 }; // used for target ball position, startpoint of estimate line
-  Vector p4 = { 0, 0 }; // used for endpoint of estimate line
+  Vector ghost = { 0, 0 }; // used for ghost ball position
+  Vector target = { 0, 0 }; // used for target ball position, startpoint of estimate line
+  Vector est_line = { 0, 0 }; // used for endpoint of estimate line
 
   uint16_t power = 0;
 
-  aimCue( &p2, &p3, &p4, ball );
+  aimCue( &ghost, &target, &est_line, ball );
 
   Point p = getPoint();
     
@@ -438,20 +445,20 @@ bool shootCue(Ball *ball) {
   // RE-AIM if we touch near the ghost
   while ( true ) {
     if ( p.touched ) {
-      if ( getDist( { p.x, p.y }, p2 ) <= ball->radius * 6 ) {
-        tft.drawLine( p1.x, p1.y, p2.x, p2.y, DGREEN );     // cue to target line
-        tft.drawCircle( p2.x, p2.y, ball->radius, DGREEN ); // ghost ball
-        tft.drawLine( p3.x, p3.y, p4.x, p4.y, DGREEN ); // estimate line
-        aimCue( &p2, &p3, &p4, ball );
+      if ( getDist( { p.x, p.y }, ghost ) <= ball->radius * 4 ) {
+        tft.drawLine( p1.x, p1.y, ghost.x, ghost.y, DGREEN );     // cue to target line
+        tft.drawCircle( ghost.x, ghost.y, ball->radius, DGREEN ); // ghost ball
+        tft.drawLine( target.x, target.y, est_line.x, est_line.y, DGREEN ); // estimate line
+        aimCue( &ghost, &target, &est_line, ball );
       } else { power = shotPower(); break; }
     }
     p = getPoint();
   }
 
-  tft.drawLine( p1.x, p1.y, p2.x, p2.y, DGREEN );     // cue to target line
-  tft.drawCircle( p2.x, p2.y, ball->radius, DGREEN ); // ghost ball
-  tft.drawLine( p3.x, p3.y, p4.x, p4.y, DGREEN ); // estimate line
+  tft.drawLine( p1.x, p1.y, ghost.x, ghost.y, DGREEN );     // cue to target line
+  tft.drawCircle( ghost.x, ghost.y, ball->radius, DGREEN ); // ghost ball
+  tft.drawLine( target.x, target.y, est_line.x, est_line.y, DGREEN ); // estimate line
 
-  launchBall( ball, p1, p2, power );
+  launchBall( ball, p1, ghost, power );
   return true;
 }
