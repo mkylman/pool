@@ -7,6 +7,13 @@ Adjust pin and point mapping in point.h
 
 https://www.youtube.com/watch?v=HvlHeZh_OiI&list=PLKe_-NZKlS9rj8NIvXMHUFk0JC5LJtnIf
 
+
+09/28/2021
+
+Changed shot power mechanic. Now, instead of holding down while power builds, we can touch and drag to adjust shot power, and release to shoot.
+The distance between the initial and final touch points is used to determine shot power. This is much faster, in terms of gameplay pace.
+Friction is still a little wonky.
+
 09/27/2021
 
 Tweaked the velocity, power(acceleration), and friction parameters by figuring out the m/s to px/s conversion.
